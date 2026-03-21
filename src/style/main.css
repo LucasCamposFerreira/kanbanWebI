@@ -1,0 +1,14 @@
+#board {
+    display: flex; /* Alinha as colunas horizontalmente */
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 20px;
+    min-height: 100vh;
+    gap: 1rem;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
