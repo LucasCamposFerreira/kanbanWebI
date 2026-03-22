@@ -29,7 +29,7 @@ export class Card extends HTMLElement {
   render() {
     const title = this.getAttribute("title") || "No title";
     const id = this.getAttribute("id") || "No id";
-    const description = this.getAttribute("description") || "No description";
+    const description = this.getAttribute("description") || "";
 
     this.shadowRoot.innerHTML = `
      <style>
@@ -45,9 +45,9 @@ export class Card extends HTMLElement {
         padding: 10px;
         border-radius: 5px;
         box-shadow: 0 1px 15px rgba(0,0,0,.04),0 1px 6px rgba(0,0,0,.04);
-        cursor: grab;
+        cursor: pointer;
         font-family: sans-serif;
-        pointer-events: none;
+        pointer-events: all;
       }
      </style>
 
@@ -56,6 +56,18 @@ export class Card extends HTMLElement {
        <p>${description}</p>
      </div>
     `;
+
+    this.shadowRoot.querySelector(".card").addEventListener("click", () => {
+      this.dispatchEvent(new CustomEvent("card-clicked", {
+        bubbles: true,
+        composed: true,
+        detail: { 
+          id: this.getAttribute("id"), 
+          title: this.getAttribute("title"), 
+          description: this.getAttribute("description") || "" 
+        }
+      }));
+    });
   }
 }
 
