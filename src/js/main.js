@@ -1,9 +1,12 @@
 import { Card } from "./components/Card.js";
 import { Column } from "./components/Column.js";
+import { Modal } from "./components/Modal.js";
 
 const board = document.querySelector("#board");
 
 const KEY = "kanban-data";
+
+const modal = document.getElementById("modal");
 
 function loadData() {
   const data = localStorage.getItem(KEY);
@@ -40,11 +43,83 @@ function initApp() {
 }
 
 board.addEventListener("card-added", (e) => {
-  const { columnId, title, id } = e.detail;
+  const { columnId, title, id, description } = e.detail;
   const data = loadData();
 
   const column = data.find(col => col.id === columnId);
-  column.cards.push({ title, id, description: e.detail.description });
+  column.cards.push({ title, id, description });
+  saveData(data);
+});
+
+board.addEventListener("card-moved", (e) => {
+  const { toColumnId, cardId } = e.detail;
+
+  const data = loadData();
+
+  
+  let card = null;
+  let sourceColumn = null;
+  
+  data.forEach(col => {
+    const found = col.cards.find(c => {
+      return c.id === cardId;
+    });
+    if (found) {
+      card = found;
+      sourceColumn = col;
+    }
+  });
+
+  if (!card || sourceColumn.id === toColumnId) return;
+
+  sourceColumn.cards = sourceColumn.cards.filter(c => c.id !== cardId);
+
+  const targetColumn = data.find(col => col.id === toColumnId);
+  targetColumn.cards.push(card);
+
+  const toColumnEl = document.getElementById(toColumnId);
+  const cardEl = document.getElementById(cardId);
+  toColumnEl.appendChild(cardEl);
+
+  saveData(data);
+});
+
+board.addEventListener("card-clicked", (e) => {
+  modal.open(e.detail);
+});
+
+document.addEventListener("card-updated", (e) => {
+  const { id, title, description } = e.detail;
+  const data = loadData();
+
+  data.forEach(col => {
+    const card = col.cards.find(c => c.id === id);
+    if (card) {
+      card.title = title;
+      card.description = description;
+    }
+  });
+
+  const cardEl = document.getElementById(id);
+  if (cardEl) {
+    cardEl.setAttribute("title", title);
+    cardEl.setAttribute("description", description);
+    cardEl.render();
+  }
+
+  saveData(data);
+});
+
+document.addEventListener("card-deleted", (e) => {
+  const { id } = e.detail;
+  const data = loadData();
+
+  data.forEach(col => {
+    col.cards = col.cards.filter(c => c.id !== id);
+  });
+
+  document.getElementById(id)?.remove();
+
   saveData(data);
 });
 

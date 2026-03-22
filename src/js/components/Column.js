@@ -12,6 +12,7 @@ export class Column extends HTMLElement {
 
   initEvents() {
     const container = this.shadowRoot.querySelector(".column");
+
     container.addEventListener("dragover", (e) => {
       e.preventDefault();
       container.style.background = "rgba(0,0,0,0.05)";
@@ -27,11 +28,12 @@ export class Column extends HTMLElement {
       container.style.background = "transparent";
 
       const cardId = e.dataTransfer.getData("text/plain");
-      const draggedCard = document.getElementById(cardId);
 
-      if (draggedCard) {
-        this.appendChild(draggedCard);
-      }
+      this.dispatchEvent(new CustomEvent("card-moved", {
+        detail: { cardId, toColumnId: this.getAttribute("id") },
+        bubbles: true,
+        composed: true
+      }));
     });
   }
 
@@ -54,10 +56,10 @@ export class Column extends HTMLElement {
       if (!title) return;
       const id = crypto.randomUUID();
 
-      this.addCard(title, id);
+      this.addCard(title, id, "");
 
       this.dispatchEvent(new CustomEvent("card-added", {
-        detail: { columnId: this.getAttribute("id"), title, id },
+        detail: { columnId: this.getAttribute("id"), title, id, description: "" },
         bubbles: true,
         composed: true
       }));
@@ -77,10 +79,11 @@ export class Column extends HTMLElement {
     });
   }
 
-  addCard(title, id) {
+  addCard(title, id, description) {
     const newCard = document.createElement("kanban-card");
     newCard.setAttribute("title", title);
     newCard.setAttribute("id", id);
+    newCard.setAttribute("description", description);
 
     this.appendChild(newCard);
   }
@@ -127,7 +130,7 @@ export class Column extends HTMLElement {
       }
     </style>
 
-    <div class="column">
+    <div class="column" id="${id}">
       <h3 class="column-title">${title}</h3>
       <div class="items-container">
         <slot></slot>
