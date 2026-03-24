@@ -1,11 +1,11 @@
 import { Card } from "./components/Card.js";
 import { Column } from "./components/Column.js";
 import { Modal } from "./components/Modal.js";
-
-const board = document.querySelector("#board");
+import { AddColumn } from "./components/AddColumn.js";
 
 const KEY = "kanban-data";
 
+const board = document.querySelector("#board");
 const modal = document.getElementById("modal");
 
 function loadData() {
@@ -18,12 +18,11 @@ function saveData(data) {
 }
 
 const initialColumns = [
-  { id: "todo", name: "To Do", cards: [
-    { id: "1", title: "Task 1" },
-    { id: "2", title: "Task 2" }
+  { id: "todo", name: "A fazer", cards: [
+    { id: "1", title: "Tarefa 1", description: "Descrição da tarefa 1" },
   ] },
-  { id: "in-progress", name: "In Progress", cards: [] },
-  { id: "done", name: "Done", cards: [] }
+  { id: "in-progress", name: "Em progresso", cards: [] },
+  { id: "done", name: "Concluído", cards: [] }
 ]
 
 function initApp() {
@@ -40,6 +39,9 @@ function initApp() {
       columnEl.addCard(card.title, card.id, card.description);
     });
   })
+
+  const addColumnEl = document.createElement("add-column");
+  board.appendChild(addColumnEl);
 }
 
 board.addEventListener("card-added", (e) => {
@@ -51,11 +53,18 @@ board.addEventListener("card-added", (e) => {
   saveData(data);
 });
 
+board.addEventListener("column-added", (e) => {
+  const { id, name } = e.detail;
+  const data = loadData();
+
+  data.push({ id, name, cards: [] });
+  saveData(data);
+});
+
 board.addEventListener("card-moved", (e) => {
   const { toColumnId, cardId } = e.detail;
 
   const data = loadData();
-
   
   let card = null;
   let sourceColumn = null;
