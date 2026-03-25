@@ -4,18 +4,12 @@ export class Card extends HTMLElement {
     this.attachShadow({ mode: "open" });
 
     this.handleDragStart = this.handleDragStart.bind(this);
-    this.handleDragEnd = this.handleDragEnd.bind(this);
   }
 
   handleDragStart(e) {
     const id = this.getAttribute("id");
     
     e.dataTransfer.setData("text/plain", id);
-    this.style.opacity = "0.5";
-  }
-
-  handleDragEnd() {
-    this.style.opacity = "1";
   }
 
   connectedCallback() {
@@ -23,7 +17,6 @@ export class Card extends HTMLElement {
 
     this.setAttribute("draggable", "true");
     this.addEventListener("dragstart", this.handleDragStart);
-    this.addEventListener("dragend", this.handleDragEnd);
   }
 
   render() {
@@ -49,6 +42,9 @@ export class Card extends HTMLElement {
         font-family: sans-serif;
         pointer-events: all;
       }
+      p {
+        margin-top: 5px;
+        font-size: 0.8rem;}
      </style>
 
      <div class="card" draggable="true" data-id="${id}">

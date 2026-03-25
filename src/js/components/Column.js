@@ -22,7 +22,6 @@ export class Column extends HTMLElement {
       container.style.background = "transparent";
     });
 
-
     container.addEventListener("drop", (e) => {
       e.preventDefault();
       container.style.background = "transparent";
@@ -139,7 +138,7 @@ export class Column extends HTMLElement {
         <button class="add-card">Adicionar Card</button>
         <div class="add-card-form" style="display:none; margin-top: 10px;">
           <input type="text" class="new-card-title" placeholder="Escreva o título do card..." style="width: 100%; padding: 5px; box-sizing: border-box; margin-bottom: 5px;">
-          <button class="save-card" style="padding: 5px; width: 100%;">Save</button>
+          <button class="save-card" style="padding: 5px; width: 100%;">Salvar</button>
         </div>
       </div>
     </div>
