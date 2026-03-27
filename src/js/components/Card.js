@@ -53,7 +53,7 @@ export class Card extends HTMLElement {
      </div>
     `;
 
-    this.shadowRoot.querySelector(".card").addEventListener("click", () => {
+    this.shadowRoot.querySelector(".card").addEventListener("dblclick", () => {
       this.dispatchEvent(new CustomEvent("card-clicked", {
         bubbles: true,
         composed: true,

@@ -1,12 +1,12 @@
 import { Card } from "./components/Card.js";
 import { Column } from "./components/Column.js";
-import { Modal } from "./components/Modal.js";
+import { ModalCard } from "./components/ModalCard.js";
 import { AddColumn } from "./components/AddColumn.js";
 
 const KEY = "kanban-data";
 
 const board = document.querySelector("#board");
-const modal = document.getElementById("modal");
+const modalCard = document.getElementById("modalCard");
 
 function loadData() {
   const data = localStorage.getItem(KEY);
@@ -56,6 +56,16 @@ board.addEventListener("card-added", (e) => {
 
 board.addEventListener("column-added", (e) => {
   const { id, name } = e.detail;
+
+  const columnEl = document.createElement("kanban-column");
+  columnEl.setAttribute("name", name);
+  columnEl.setAttribute("id", id);
+
+  columnEl.classList.add("column-container");
+  
+  const addColumnEl = board.querySelector("add-column");
+  board.insertBefore(columnEl, addColumnEl);
+  
   const data = loadData();
 
   data.push({ id, name, cards: [] });
@@ -95,8 +105,10 @@ board.addEventListener("card-moved", (e) => {
 });
 
 board.addEventListener("card-clicked", (e) => {
-  modal.open(e.detail);
+  modalCard.open(e.detail);
 });
+
+
 
 document.addEventListener("card-updated", (e) => {
   const { id, title, description } = e.detail;
@@ -118,6 +130,27 @@ document.addEventListener("card-updated", (e) => {
   }
 
   saveData(data);
+});
+
+document.addEventListener("column-updated", (e) => {
+  const { id, newName } = e.detail;
+  const data = loadData();
+
+  const column = data.find(col => col.id === id);
+  if (column) {
+    column.name = newName;
+    saveData(data);
+  }
+});
+
+document.addEventListener("column-deleted", (e) => {
+  const { id } = e.detail;
+  const data = loadData();
+
+  const newData = data.filter(col => col.id !== id);
+  saveData(newData);
+
+  document.getElementById(id)?.remove();
 });
 
 document.addEventListener("card-deleted", (e) => {

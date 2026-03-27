@@ -1,4 +1,4 @@
-export class Modal extends HTMLElement {
+export class ModalCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -73,7 +73,7 @@ export class Modal extends HTMLElement {
           align-items: center;
           justify-content: center;
         }
-        .modal {
+        .modalCard {
           background: #f4f5f7;
           border-radius: 8px;
           padding: 24px;
@@ -123,7 +123,7 @@ export class Modal extends HTMLElement {
           display: flex;
           justify-content: space-between;
         }
-        .save-button
+        .save-button {
           background: #0079bf;
           color: white;
           border: none;
@@ -155,7 +155,7 @@ export class Modal extends HTMLElement {
       </style>
 
       <div class="overlay">
-        <div class="modal">
+        <div class="modalCard">
           <div>
             <label>Título</label>
             <input class="title-input" type="text">
@@ -174,4 +174,4 @@ export class Modal extends HTMLElement {
   }
 }
 
-customElements.define('kanban-modal', Modal);
+customElements.define('kanban-modal-card', ModalCard);

@@ -52,8 +52,6 @@ export class AddColumn extends HTMLElement {
       if (!name) return;
       const id = crypto.randomUUID();
 
-      this.addColumn(name, id);
-
       this.dispatchEvent(new CustomEvent("column-added", {
         detail: { id, name },
         bubbles: true,
@@ -62,15 +60,15 @@ export class AddColumn extends HTMLElement {
 
       this.closeForm();
     });
-  }
 
-  addColumn(name, id) {
-    const columnEl = document.createElement("kanban-column");
-    columnEl.setAttribute("name", name);
-    columnEl.setAttribute("id", id);
-    
-    // Supondo que 'board' é uma variável global ou acessível no seu escopo
-    board.insertBefore(columnEl, this);
+    newColumnName.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") saveColumnButton.click();
+      if (e.key === "Escape") {
+        newColumnName.value = "";
+        addColumnForm.style.display = "none";
+        addColumnButton.style.display = "block";
+      }
+    });
   }
 
   closeForm() {
@@ -86,76 +84,73 @@ export class AddColumn extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
        :host {
-         display: block;
-         width: 100%;
-         height: 100%;
+          display: block;
+          width: 300px;
+          margin: 10px;
        } 
        .add-column {
-         width: 100%;
-         font-family: sans-serif;
+          width: 100%;
+          font-family: sans-serif;
        }
        .add-column-form {
-         border-radius: 5px;
-         padding: 15px;
-         background: white;
-         box-shadow: 0 1px 15px rgba(0,0,0,.04),0 1px 6px rgba(0,0,0,.04);
+          border-radius: 5px;
+          padding: 15px;
+          background: white;
+          box-shadow: 0 1px 15px rgba(0,0,0,.04),0 1px 6px rgba(0,0,0,.04);
        }
        
        /* Estilos do FAB e do Menu */
        .fab-container {
-         position: fixed;
-         bottom: 90px;
-         right: 20px;
-         display: flex;
-         flex-direction: column;
-         align-items: flex-end;
-         gap: 15px;
-         z-index: 1000;
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 15px;
+          z-index: 1000;
        }
        .fab-menu {
-         display: flex;
-         flex-direction: column;
-         align-items: flex-end;
-         gap: 10px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 10px;
        }
        .fab-item {
-         background-color: white;
-         color: #333;
-         border: none;
-         padding: 12px 20px;
-         border-radius: 24px;
-         box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-         cursor: pointer;
-         font-family: sans-serif;
-         font-size: 14px;
-         font-weight: bold;
-         transition: background-color 0.2s;
+          background-color: white;
+          color: #333;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 24px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+          cursor: pointer;
+          font-family: sans-serif;
+          font-size: 14px;
+          font-weight: bold;
+          transition: background-color 0.2s;
        }
        .fab-item:hover {
          background-color: #f0f0f0;
        }
        .fab {
-         position: fixed;
-         bottom: 20px;
-         right: 20px; 
-         width: 60px;
-         height: 60px;
-         background-color: #007bff;
-         color: white;
-         border: none;
-         border-radius: 50%;
-         text-align: center;
-         font-size: 30px;
-         line-height: 60px;
-         box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
-         cursor: pointer;
-         transition: transform 0.3s ease, background-color 0.3s;
-         display: flex;
-         align-items: center;
-         justify-content: center;
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          text-align: center;
+          font-size: 30px;
+          line-height: 60px;
+          box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+          cursor: pointer;
+          transition: transform 0.3s ease, background-color 0.3s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
        }
        .fab:hover {
-         background-color: #0056b3;
+          background-color: #0056b3;
        }
       </style>
       
