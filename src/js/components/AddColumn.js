@@ -2,6 +2,8 @@ export class AddColumn extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+    this._menuOpen = false;
+    this._outsideClick = this._outsideClick.bind(this);
   }
 
   connectedCallback() {
@@ -9,9 +11,39 @@ export class AddColumn extends HTMLElement {
     this.initFormEvents();
   }
 
+  disconnectedCallback() {
+    document.removeEventListener("click", this._outsideClick);
+    document.removeEventListener("touchstart", this._outsideClick);
+  }
+
+  _outsideClick(e) {
+    if (!this._menuOpen) return;
+    const path = e.composedPath();
+    const fab = this.shadowRoot.querySelector(".fab");
+    const menu = this.shadowRoot.querySelector(".fab-menu");
+    if (!path.includes(fab) && !path.includes(menu)) {
+      this._closeMenu();
+    }
+  }
+
+  _openMenu() {
+    this._menuOpen = true;
+    this.shadowRoot.querySelector(".fab-menu").classList.add("open");
+    this.shadowRoot.querySelector(".fab").classList.add("active");
+    document.addEventListener("click", this._outsideClick);
+    document.addEventListener("touchstart", this._outsideClick);
+  }
+
+  _closeMenu() {
+    this._menuOpen = false;
+    this.shadowRoot.querySelector(".fab-menu").classList.remove("open");
+    this.shadowRoot.querySelector(".fab").classList.remove("active");
+    document.removeEventListener("click", this._outsideClick);
+    document.removeEventListener("touchstart", this._outsideClick);
+  }
+
   initFormEvents() {
     const fab = this.shadowRoot.querySelector(".fab");
-    const fabMenu = this.shadowRoot.querySelector(".fab-menu");
     const btnNewColumn = this.shadowRoot.querySelector("#btn-new-column");
     const btnNewBoard = this.shadowRoot.querySelector("#btn-new-board");
 
@@ -21,23 +53,24 @@ export class AddColumn extends HTMLElement {
     const cancelColumnButton = this.shadowRoot.querySelector(".cancel-column");
 
     fab.addEventListener("click", (e) => {
-      e.preventDefault();
-      const isMenuOpen = fabMenu.classList.contains("open");
-      fabMenu.classList.toggle("open", !isMenuOpen);
-      fab.classList.toggle("active", !isMenuOpen);
+      e.stopPropagation();
+      this._menuOpen ? this._closeMenu() : this._openMenu();
     });
 
-    btnNewColumn.addEventListener("click", () => {
-      fabMenu.classList.remove("open");
-      fab.classList.remove("active");
+    btnNewColumn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._closeMenu();
       addColumnForm.style.display = "block";
       newColumnName.focus();
     });
 
-    btnNewBoard.addEventListener("click", () => {
-      alert("A função de criar um Novo Quadro será implementada em breve!");
-      fabMenu.classList.remove("open");
-      fab.classList.remove("active");
+    btnNewBoard.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._closeMenu();
+      this.dispatchEvent(new CustomEvent("new-board-requested", {
+        bubbles: true,
+        composed: true
+      }));
     });
 
     saveColumnButton.addEventListener("click", () => {
@@ -54,23 +87,15 @@ export class AddColumn extends HTMLElement {
       this.closeForm();
     });
 
-    cancelColumnButton.addEventListener("click", () => {
-      this.closeForm();
-    });
+    cancelColumnButton.addEventListener("click", () => this.closeForm());
 
-    newColumnName.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") saveColumnButton.click();
-    });
-    newColumnName.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") this.closeForm();
-    });
+    newColumnName.addEventListener("keypress", (e) => { if (e.key === "Enter") saveColumnButton.click(); });
+    newColumnName.addEventListener("keydown", (e) => { if (e.key === "Escape") this.closeForm(); });
   }
 
   closeForm() {
-    const newColumnName = this.shadowRoot.querySelector(".new-column-name");
-    const addColumnForm = this.shadowRoot.querySelector(".add-column-form");
-    addColumnForm.style.display = "none";
-    newColumnName.value = "";
+    this.shadowRoot.querySelector(".new-column-name").value = "";
+    this.shadowRoot.querySelector(".add-column-form").style.display = "none";
   }
 
   render() {
@@ -118,6 +143,7 @@ export class AddColumn extends HTMLElement {
         }
 
         .new-column-name:focus { border-color: rgba(99,102,241,0.6); }
+        .new-column-name::placeholder { color: #3f4561; }
 
         .form-actions { display: flex; gap: 6px; }
 
@@ -139,6 +165,7 @@ export class AddColumn extends HTMLElement {
         .btn-neutral { background: #3f4561; color: #e8eaf0; }
         .btn-neutral:hover { background: #4a506e; }
 
+        /* FAB */
         .fab-container {
           position: fixed;
           bottom: 24px;
@@ -183,6 +210,7 @@ export class AddColumn extends HTMLElement {
           font-weight: 600;
           transition: background 0.15s, border-color 0.15s, transform 0.15s;
           white-space: nowrap;
+          -webkit-tap-highlight-color: transparent;
         }
 
         .fab-item:hover {
@@ -211,23 +239,28 @@ export class AddColumn extends HTMLElement {
           background: linear-gradient(135deg, #6366f1, #8b5cf6);
           color: white;
           border: none;
-          font-size: 24px;
           box-shadow: 0 4px 20px rgba(99,102,241,0.5), 0 2px 8px rgba(0,0,0,0.4);
           cursor: pointer;
           transition: transform 0.25s ease, box-shadow 0.2s ease;
           display: flex;
           align-items: center;
           justify-content: center;
+          -webkit-tap-highlight-color: transparent;
+          outline: none;
+          flex-shrink: 0;
         }
 
         .fab:hover {
           box-shadow: 0 6px 28px rgba(99,102,241,0.65), 0 4px 12px rgba(0,0,0,0.4);
-          transform: scale(1.05);
+          transform: scale(1.06);
         }
 
-        .fab.active { transform: rotate(45deg) scale(1.05); }
+        .fab.active {
+          transform: rotate(45deg) scale(1.06);
+          box-shadow: 0 6px 28px rgba(99,102,241,0.65), 0 4px 12px rgba(0,0,0,0.4);
+        }
 
-        .fab svg { transition: transform 0.25s ease; pointer-events: none; }
+        .fab svg { display: block; pointer-events: none; flex-shrink: 0; }
       </style>
 
       <div class="add-column">
@@ -246,7 +279,8 @@ export class AddColumn extends HTMLElement {
           <button class="fab-item" id="btn-new-board">
             <span class="fab-item-icon purple">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
               </svg>
             </span>
             Novo Quadro

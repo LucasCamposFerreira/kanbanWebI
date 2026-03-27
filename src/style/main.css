@@ -28,10 +28,13 @@
   --radius-lg: 14px;
   --shadow-column: 0 4px 24px rgba(0, 0, 0, 0.3);
 
+  --nav-width-collapsed: 56px;
+  --nav-width-expanded: 220px;
+
   --font: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
-* {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -42,12 +45,20 @@ body {
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.12), transparent),
     radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.07), transparent);
-  overflow-y: hidden;
   font-family: var(--font);
   min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+kanban-sidebar {
+  flex-shrink: 0;
+  height: 100vh;
+  z-index: 50;
 }
 
 #board {
+  flex: 1;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -57,6 +68,7 @@ body {
   overflow-x: auto;
   overflow-y: auto;
   scroll-behavior: smooth;
+  min-width: 0;
 }
 
 .column-container,
@@ -74,14 +86,18 @@ add-column {
 #board::-webkit-scrollbar-thumb:hover { background-color: var(--accent); }
 
 @media (max-width: 768px) {
+  body { flex-direction: row; }
+
   #board {
-    padding: 14px 12px;
+    padding: 14px 10px;
     gap: 12px;
     scroll-snap-type: x mandatory;
   }
-  .column-container, add-column {
-    width: 88vw;
-    max-width: 340px;
+
+  .column-container,
+  add-column {
+    width: 82vw;
+    max-width: 320px;
     scroll-snap-align: center;
   }
 }

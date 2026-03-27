@@ -15,19 +15,19 @@ export class Column extends HTMLElement {
 
     container.addEventListener("dragover", (e) => {
       e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
       container.classList.add("drag-over");
     });
 
-    container.addEventListener("dragleave", () => {
-      container.classList.remove("drag-over");
+    container.addEventListener("dragleave", (e) => {
+      if (!container.contains(e.relatedTarget)) container.classList.remove("drag-over");
     });
 
     container.addEventListener("drop", (e) => {
       e.preventDefault();
       container.classList.remove("drag-over");
-
       const cardId = e.dataTransfer.getData("text/plain");
-
+      if (!cardId) return;
       this.dispatchEvent(new CustomEvent("card-moved", {
         detail: { cardId, toColumnId: this.getAttribute("id") },
         bubbles: true,
@@ -73,55 +73,39 @@ export class Column extends HTMLElement {
       addCardButton.style.display = "flex";
     });
 
-    newCardTitle.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") saveCardButton.click();
-    });
-    newCardTitle.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") cancelCardButton.click();
-    });
+    newCardTitle.addEventListener("keypress", (e) => { if (e.key === "Enter") saveCardButton.click(); });
+    newCardTitle.addEventListener("keydown", (e) => { if (e.key === "Escape") cancelCardButton.click(); });
   }
 
   openEditColumnForm() {
-    const columnTitle = this.shadowRoot.querySelector(".column-title");
-    const editColumnSection = this.shadowRoot.querySelector(".edit-column");
-    const editColumnNameInput = this.shadowRoot.querySelector(".edit-column-name");
-    const editColumnButtons = this.shadowRoot.querySelector(".edit-column-buttons");
-
-    editColumnButtons.style.display = "flex";
-    editColumnSection.style.display = "block";
-    columnTitle.style.display = "none";
-
-    editColumnNameInput.value = this.getAttribute("name");
-    editColumnNameInput.focus();
+    this.shadowRoot.querySelector(".column-title").style.display = "none";
+    this.shadowRoot.querySelector(".edit-column").style.display = "block";
+    this.shadowRoot.querySelector(".edit-column-buttons").style.display = "flex";
+    const input = this.shadowRoot.querySelector(".edit-column-name");
+    input.value = this.getAttribute("name");
+    input.focus();
   }
 
   closeEditColumnForm() {
-    const columnTitle = this.shadowRoot.querySelector(".column-title");
-    const editColumnSection = this.shadowRoot.querySelector(".edit-column");
-    const editColumnNameInput = this.shadowRoot.querySelector(".edit-column-name");
-    const editColumnButtons = this.shadowRoot.querySelector(".edit-column-buttons");
-
-    editColumnButtons.style.display = "none";
-    editColumnSection.style.display = "none";
-    columnTitle.style.display = "block";
-    editColumnNameInput.value = "";
+    this.shadowRoot.querySelector(".column-title").style.display = "block";
+    this.shadowRoot.querySelector(".edit-column").style.display = "none";
+    this.shadowRoot.querySelector(".edit-column-buttons").style.display = "none";
+    this.shadowRoot.querySelector(".edit-column-name").value = "";
   }
 
   saveEditedColumnName() {
-    const editColumnNameInput = this.shadowRoot.querySelector(".edit-column-name");
-    const newName = editColumnNameInput.value.trim();
+    const input = this.shadowRoot.querySelector(".edit-column-name");
+    const newName = input.value.trim();
     const oldName = this.getAttribute("name");
-
     if (!newName) return;
     if (newName === oldName) { this.closeEditColumnForm(); return; }
 
-    const columnId = this.getAttribute("id");
     this.setAttribute("name", newName);
     this.shadowRoot.querySelector(".column-title").textContent = newName;
     this.closeEditColumnForm();
 
     this.dispatchEvent(new CustomEvent("column-updated", {
-      detail: { id: columnId, newName },
+      detail: { id: this.getAttribute("id"), newName },
       bubbles: true,
       composed: true
     }));
@@ -129,21 +113,19 @@ export class Column extends HTMLElement {
 
   deleteColumn() {
     if (!confirm("Você tem certeza que deseja excluir esta coluna? Todos os cards dentro dela também serão excluídos.")) return;
-
-    const columnId = this.getAttribute("id");
-
     this.dispatchEvent(new CustomEvent("column-deleted", {
-      detail: { id: columnId },
+      detail: { id: this.getAttribute("id") },
       bubbles: true,
       composed: true
     }));
   }
 
-  addCard(title, id, description) {
+  addCard(title, id, description, color) {
     const newCard = document.createElement("kanban-card");
     newCard.setAttribute("title", title);
     newCard.setAttribute("id", id);
-    newCard.setAttribute("description", description);
+    newCard.setAttribute("description", description || "");
+    if (color) newCard.setAttribute("color", color);
     this.appendChild(newCard);
   }
 
@@ -173,7 +155,7 @@ export class Column extends HTMLElement {
         flex-direction: column;
         gap: 10px;
         box-shadow: 0 4px 24px rgba(0,0,0,0.3);
-        transition: border-color 0.18s ease, background 0.18s ease;
+        transition: border-color 0.18s, background 0.18s;
         overflow: hidden;
       }
 
@@ -206,13 +188,7 @@ export class Column extends HTMLElement {
         white-space: nowrap;
       }
 
-      .column-title:hover { color: #c4c7d9; }
-
-      .column-actions {
-        display: flex;
-        gap: 4px;
-        flex-shrink: 0;
-      }
+      .column-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
       .icon-btn {
         width: 26px;
@@ -260,10 +236,7 @@ export class Column extends HTMLElement {
 
       .edit-column-name:focus { border-color: rgba(99,102,241,0.6); }
 
-      .edit-column-buttons {
-        display: none;
-        gap: 6px;
-      }
+      .edit-column-buttons { display: none; gap: 6px; }
 
       .btn {
         padding: 6px 12px;
@@ -282,14 +255,12 @@ export class Column extends HTMLElement {
       .btn-success:hover { background: #059669; }
       .btn-neutral { background: #3f4561; color: #e8eaf0; }
       .btn-neutral:hover { background: #4a506e; }
-      .btn-danger { background: #ef4444; color: #fff; }
-      .btn-danger:hover { background: #dc2626; }
 
       .items-container {
         flex: 1;
         overflow-y: auto;
         overflow-x: hidden;
-        padding-right: 2px;
+        padding: 2px 0;
       }
 
       .items-container::-webkit-scrollbar { width: 4px; }
@@ -324,10 +295,7 @@ export class Column extends HTMLElement {
         color: #a5b4fc;
       }
 
-      .add-card-form {
-        display: none;
-        flex-shrink: 0;
-      }
+      .add-card-form { display: none; flex-shrink: 0; }
 
       .new-card-title {
         width: 100%;
@@ -339,17 +307,12 @@ export class Column extends HTMLElement {
         font-family: inherit;
         font-size: 0.875rem;
         outline: none;
-        resize: none;
         transition: border-color 0.15s;
         margin-bottom: 8px;
       }
 
       .new-card-title:focus { border-color: rgba(99,102,241,0.6); }
-
-      .add-card-actions {
-        display: flex;
-        gap: 6px;
-      }
+      .add-card-actions { display: flex; gap: 6px; }
 
       @media (max-width: 768px) {
         :host { width: 100%; margin: 0; }
@@ -363,12 +326,16 @@ export class Column extends HTMLElement {
         <div class="column-actions">
           <button class="icon-btn edit-btn" title="Editar coluna">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </button>
           <button class="icon-btn danger delete-btn" title="Excluir coluna">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6"/><path d="M14 11v6"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
             </svg>
           </button>
         </div>
@@ -405,32 +372,14 @@ export class Column extends HTMLElement {
     </div>
     `;
 
-    this.shadowRoot.querySelector(".column-title").addEventListener("dblclick", () => {
-      this.openEditColumnForm();
-    });
-
-    this.shadowRoot.querySelector(".edit-btn").addEventListener("click", () => {
-      this.openEditColumnForm();
-    });
-
-    this.shadowRoot.querySelector(".cancel-edit-column").addEventListener("click", () => {
-      this.closeEditColumnForm();
-    });
-
-    this.shadowRoot.querySelector(".save-column-name").addEventListener("click", () => {
-      this.saveEditedColumnName();
-    });
-
-    this.shadowRoot.querySelector(".edit-column-name").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.saveEditedColumnName();
-    });
-    this.shadowRoot.querySelector(".edit-column-name").addEventListener("keydown", (e) => {
-      if (e.key === "Escape") this.closeEditColumnForm();
-    });
-
-    this.shadowRoot.querySelector(".delete-btn").addEventListener("click", () => {
-      this.deleteColumn();
-    });
+    this.shadowRoot.querySelector(".column-title").addEventListener("dblclick", () => this.openEditColumnForm());
+    this.shadowRoot.querySelector(".edit-btn").addEventListener("click", () => this.openEditColumnForm());
+    this.shadowRoot.querySelector(".cancel-edit-column").addEventListener("click", () => this.closeEditColumnForm());
+    this.shadowRoot.querySelector(".save-column-name").addEventListener("click", () => this.saveEditedColumnName());
+    const nameInput = this.shadowRoot.querySelector(".edit-column-name");
+    nameInput.addEventListener("keypress", (e) => { if (e.key === "Enter") this.saveEditedColumnName(); });
+    nameInput.addEventListener("keydown", (e) => { if (e.key === "Escape") this.closeEditColumnForm(); });
+    this.shadowRoot.querySelector(".delete-btn").addEventListener("click", () => this.deleteColumn());
   }
 }
 
