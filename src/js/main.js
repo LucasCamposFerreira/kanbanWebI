@@ -32,6 +32,7 @@ function initApp() {
     const columnEl = document.createElement('kanban-column');
     columnEl.setAttribute('id', col.id);
     columnEl.setAttribute('name', col.name);
+    columnEl.classList.add("column-container");
 
     board.appendChild(columnEl);
 
