@@ -78,6 +78,73 @@ export class Column extends HTMLElement {
     });
   }
 
+  openEditColumnForm() {
+    const columnTitle = this.shadowRoot.querySelector(".column-title");
+
+    const editColumnSection = this.shadowRoot.querySelector(".edit-column");
+    const editColumnNameInput = this.shadowRoot.querySelector(".edit-column-name");
+    const editColumnButtons = this.shadowRoot.querySelector(".edit-column-buttons");
+
+    editColumnButtons.style.display = "flex";
+    editColumnSection.style.display = "block";
+    columnTitle.style.display = "none";
+    
+    editColumnNameInput.value = this.getAttribute("name");
+    editColumnNameInput.focus();
+  }
+
+  closeEditColumnForm() {
+    const columnTitle = this.shadowRoot.querySelector(".column-title");
+
+    const editColumnSection = this.shadowRoot.querySelector(".edit-column");
+    const editColumnNameInput = this.shadowRoot.querySelector(".edit-column-name");
+    const editColumnButtons = this.shadowRoot.querySelector(".edit-column-buttons");
+
+    editColumnButtons.style.display = "none";
+    editColumnSection.style.display = "none";
+    columnTitle.style.display = "block";
+
+    editColumnNameInput.value = "";
+  }
+
+  saveEditedColumnName() {
+    const editColumnNameInput = this.shadowRoot.querySelector(".edit-column-name");
+    const newName = editColumnNameInput.value.trim();
+
+    const oldName = this.getAttribute("name");
+
+    if (!newName) return;
+
+    if (newName === oldName) {
+      this.closeEditColumnForm();
+      return;
+    }
+
+    const columnId = this.getAttribute("id");
+
+    this.setAttribute("name", newName);
+    this.shadowRoot.querySelector(".column-title").textContent = newName;
+    this.closeEditColumnForm();
+
+    this.dispatchEvent(new CustomEvent("column-updated", {
+      detail: { id: columnId, newName },
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+  deleteColumn() {
+    if (!confirm("Você tem certeza que deseja excluir esta coluna? Todos os cards dentro dela também serão excluídos.")) return;
+
+    const columnId = this.getAttribute("id");
+
+    this.dispatchEvent(new CustomEvent("column-deleted", {
+      detail: { id: columnId },
+      bubbles: true,
+      composed: true
+    }));
+  }
+
   addCard(title, id, description) {
     const newCard = document.createElement("kanban-card");
     newCard.setAttribute("title", title);
@@ -105,6 +172,7 @@ export class Column extends HTMLElement {
       .column {
         border-radius: 5px;
         padding: 15px;
+        min-width: 250px;
         min-height: 60vh;
         box-shadow: 0 1px 15px rgba(0,0,0,.04),0 1px 6px rgba(0,0,0,.04);
       }
@@ -124,13 +192,69 @@ export class Column extends HTMLElement {
         font-family: sans-serif;
         width: 100%;
       }
+
       .add-card:hover {
         background: rgba(0,0,0,0.1);
+      }
+
+      .edit-column-buttons {
+        display: flex;
+        gap: .5rem;
+        margin-bottom: 1rem;
+      }
+
+      .edit-column-buttons button {
+        padding: 5px; 
+        width: 100%;
+        margin-top: 5px;
+      }
+
+      .save-column-name {
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .cancel-edit-column {
+        background: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .delete-column {
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      @media (max-width: 768px) {
+        :host {
+          width: 100%;
+          margin: 10px 0;
+        }
       }
     </style>
 
     <div class="column" id="${id}">
       <h3 class="column-title">${title}</h3>
+      <div class="edit-column" style="display:none;">
+        <label>Editar nome da coluna</label>
+        <input type="text" class="edit-column-name" style="width: 100%; padding: 5px; box-sizing: border-box; margin-bottom: 5px;">
+        <div class="edit-column-buttons" style="display:none;">
+          <button class="save-column-name" >Salvar</button>
+          <button class="cancel-edit-column">Cancelar</button>
+          <button class="delete-column">Excluir</button>
+        </div>
+      </div>
       <div class="items-container">
         <slot></slot>
       </div>
@@ -143,6 +267,27 @@ export class Column extends HTMLElement {
       </div>
     </div>
     `;
+
+    this.shadowRoot.querySelector(".column-title").addEventListener("dblclick", () => {
+      this.openEditColumnForm();
+    });
+
+    this.shadowRoot.querySelector(".cancel-edit-column").addEventListener("click", () => {
+      this.closeEditColumnForm();
+    });
+
+    this.shadowRoot.querySelector(".save-column-name").addEventListener("click", () => {
+      this.saveEditedColumnName();
+    });
+
+    this.shadowRoot.querySelector(".edit-column-name").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") this.saveEditedColumnName();
+      if (e.key === "Escape") this.closeEditColumnForm();
+    });
+
+    this.shadowRoot.querySelector(".delete-column").addEventListener("click", () => {
+      this.deleteColumn();
+    });
   }
 }
 
