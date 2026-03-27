@@ -87,8 +87,8 @@ export class AddColumn extends HTMLElement {
       <style>
        :host {
          display: block;
-         width: 300px;
-         margin: 10px;
+         width: 100%;
+         height: 100%;
        } 
        .add-column {
          width: 100%;
@@ -104,7 +104,7 @@ export class AddColumn extends HTMLElement {
        /* Estilos do FAB e do Menu */
        .fab-container {
          position: fixed;
-         bottom: 20px;
+         bottom: 90px;
          right: 20px;
          display: flex;
          flex-direction: column;
@@ -135,6 +135,9 @@ export class AddColumn extends HTMLElement {
          background-color: #f0f0f0;
        }
        .fab {
+         position: fixed;
+         bottom: 20px;
+         right: 20px; 
          width: 60px;
          height: 60px;
          background-color: #007bff;

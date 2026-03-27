@@ -99,8 +99,8 @@ export class Column extends HTMLElement {
       }
       :host {
         display: block;
-        width: 300px;
-        margin: 10px;
+        width: 100%;
+        height: 100%;
       }
       .column {
         border-radius: 5px;
