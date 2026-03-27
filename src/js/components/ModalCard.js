@@ -143,6 +143,15 @@ export class ModalCard extends HTMLElement {
           font-weight: 600;
         }
         .delete-button:hover { background: #c9372c; }
+        @media (max-width: 600px) {
+          .modal {
+            width: 95vw;
+            padding: 16px;
+          }
+          .description-input {
+            height: 100px;
+          }
+        }
       </style>
 
       <div class="overlay">
