@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KanbanWeb</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       Auth Section (login / register)
+  ══════════════════════════════════════════ -->
+  <div id="auth-section" class="auth-section">
+    <div class="auth-container">
+
+      <div class="auth-logo">
+        <span class="logo-icon">📋</span>
+        <span class="logo-text">KanbanWeb</span>
+      </div>
+
+      <!-- Login form -->
+      <div id="login-form">
+        <h2>Entrar</h2>
+
+        <label for="login-email">E-mail</label>
+        <input type="email"    id="login-email"    placeholder="seu@email.com" autocomplete="email" />
+
+        <label for="login-password">Senha</label>
+        <input type="password" id="login-password" placeholder="••••••"        autocomplete="current-password" />
+
+        <button id="btn-login" class="btn-primary btn-full">Entrar</button>
+
+        <p class="auth-switch">
+          Não tem conta?
+          <a href="#" id="show-register">Cadastre-se</a>
+        </p>
+
+        <div id="login-error" class="error-msg" role="alert"></div>
+      </div>
+
+      <!-- Register form (hidden by default) -->
+      <div id="register-form" style="display:none">
+        <h2>Criar conta</h2>
+
+        <label for="register-name">Nome</label>
+        <input type="text"     id="register-name"     placeholder="Seu nome"        autocomplete="name" />
+
+        <label for="register-email">E-mail</label>
+        <input type="email"    id="register-email"    placeholder="seu@email.com"    autocomplete="email" />
+
+        <label for="register-password">Senha</label>
+        <input type="password" id="register-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+
+        <button id="btn-register" class="btn-primary btn-full">Criar conta</button>
+
+        <p class="auth-switch">
+          Já tem conta?
+          <a href="#" id="show-login">Entrar</a>
+        </p>
+
+        <div id="register-error" class="error-msg" role="alert"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       App Section (Kanban board)
+  ══════════════════════════════════════════ -->
+  <div id="app-section" style="display:none" class="app-section">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <span class="logo-icon">📋</span>
+        <span class="logo-text">KanbanWeb</span>
+      </div>
+      <div class="header-actions">
+        <span id="user-name" class="user-name"></span>
+        <button id="btn-logout" class="btn-logout">Sair</button>
+      </div>
+    </header>
+
+    <!-- Board -->
+    <div class="board-wrapper">
+      <div id="columns-container" class="columns-container">
+        <!-- Columns rendered dynamically by app.js -->
+      </div>
+      <button id="btn-add-column" class="btn-add-column">
+        <span class="plus-icon">＋</span> Nova Coluna
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       Card Modal (add / edit)
+  ══════════════════════════════════════════ -->
+  <div id="card-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" style="display:none">
+    <div class="modal-content">
+      <h3 id="modal-title">Novo Card</h3>
+
+      <label for="card-title-input">Título *</label>
+      <input type="text" id="card-title-input" placeholder="Título do card" maxlength="120" />
+
+      <label for="card-desc-input">Descrição</label>
+      <textarea id="card-desc-input" placeholder="Descrição opcional…" rows="4" maxlength="500"></textarea>
+
+      <div class="modal-buttons">
+        <button id="btn-save-card"   class="btn-primary">Salvar</button>
+        <button id="btn-cancel-card" class="btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       Firebase SDK (compat v9)
+  ══════════════════════════════════════════ -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
